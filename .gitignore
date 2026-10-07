@@ -41,3 +41,13 @@ build/
 *.log
 
 /spec/
+
+# Secretos locales. Nunca deben versionarse.
+/.environments/
+/.env
+/.env.*
+
+# Helpers de shell temporal
+*.ps1
+build.log
+
