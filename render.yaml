@@ -7,18 +7,21 @@ services:
     autoDeployTrigger: commit
     healthCheckPath: /v3/api-docs
     envVars:
+      # Supabase es PostgreSQL, no MySQL. El dialecto decide el driver JDBC que se carga.
+      - key: DB_DIALECT
+        value: postgresql
       - key: DB_HOST
         sync: false
       - key: DB_PORT
-        value: "3306"
+        value: "5432"
       - key: DB_NAME
-        value: crud_usuarios
+        value: postgres
       - key: DB_USERNAME
         sync: false
       - key: DB_PASSWORD
         sync: false
       - key: DB_SSL_MODE
-        value: REQUIRED
+        value: require
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT

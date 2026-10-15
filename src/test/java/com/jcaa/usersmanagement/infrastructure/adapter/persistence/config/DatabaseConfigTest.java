@@ -17,7 +17,7 @@ class DatabaseConfigTest {
   void shouldBuildJdbcUrlWithConfiguredSslMode() {
     // Arrange
     final DatabaseConfig config =
-        new DatabaseConfig(HOST, PORT, DATABASE, USERNAME, PASSWORD, SSL_MODE);
+        new DatabaseConfig(HOST, PORT, DATABASE, USERNAME, PASSWORD, SSL_MODE, "mysql");
 
     // Act
     final String jdbcUrl = config.buildJdbcUrl();
@@ -27,5 +27,45 @@ class DatabaseConfigTest {
         .isEqualTo(
             "jdbc:mysql://mysql.example.com:15425/crud_usuarios"
                 + "?sslMode=REQUIRED&serverTimezone=UTC&allowPublicKeyRetrieval=true");
+  }
+
+  @Test
+  void shouldBuildPostgresJdbcUrlForSupabase() {
+    // Arrange
+    final DatabaseConfig config =
+        new DatabaseConfig(
+            "db.abc.supabase.co",
+            5432,
+            "postgres",
+            "postgres",
+            PASSWORD,
+            "require",
+            "postgresql");
+
+    // Act
+    final String jdbcUrl = config.buildJdbcUrl();
+
+    // Assert: el driver de PostgreSQL exige sslmode en minusculas, a diferencia de MySQL
+    assertThat(jdbcUrl)
+        .isEqualTo("jdbc:postgresql://db.abc.supabase.co:5432/postgres?sslmode=require");
+  }
+
+  @Test
+  void shouldDefaultToMysqlWhenDialectIsMissing() {
+    // Arrange
+    final DatabaseConfig config =
+        new DatabaseConfig(HOST, PORT, DATABASE, USERNAME, PASSWORD, SSL_MODE, null);
+
+    // Act & Assert
+    assertThat(config.buildJdbcUrl()).startsWith("jdbc:mysql://");
+  }
+
+  @Test
+  void shouldAcceptAliasesOfPostgres() {
+    // Arrange, Act & Assert: los tres nombres se usan en la documentacion de Supabase
+    assertThat(DatabaseConfig.Dialect.from("postgres")).isEqualTo(DatabaseConfig.Dialect.POSTGRESQL);
+    assertThat(DatabaseConfig.Dialect.from("PG")).isEqualTo(DatabaseConfig.Dialect.POSTGRESQL);
+    assertThat(DatabaseConfig.Dialect.from("postgresql")).isEqualTo(DatabaseConfig.Dialect.POSTGRESQL);
+    assertThat(DatabaseConfig.Dialect.from("mysql")).isEqualTo(DatabaseConfig.Dialect.MYSQL);
   }
 }

@@ -1,6 +1,7 @@
 services:
   mysql:
     image: mysql:8.4
+    profiles: ["mysql"]
     environment:
       MYSQL_DATABASE: crud_usuarios
       MYSQL_USER: users_app
@@ -21,6 +22,28 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  postgres:
+    # PostgreSQL local, para probar el mismo camino que usa Supabase en produccion.
+    # docker compose --profile postgres up
+    image: postgres:17-alpine
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_DB: crud_usuarios
+      POSTGRES_USER: users_app
+      POSTGRES_PASSWORD: local_users_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./src/main/resources/schema-postgres.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U users_app -d crud_usuarios"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+
   api:
     build:
       context: .
@@ -28,12 +51,13 @@ services:
     image: users-management-api:local
     environment:
       PORT: "8080"
-      DB_HOST: mysql
-      DB_PORT: "3306"
-      DB_NAME: crud_usuarios
-      DB_USERNAME: users_app
-      DB_PASSWORD: local_users_password
-      DB_SSL_MODE: DISABLED
+      DB_DIALECT: ${DB_DIALECT:-mysql}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-crud_usuarios}
+      DB_USERNAME: ${DB_USERNAME:-users_app}
+      DB_PASSWORD: ${DB_PASSWORD:-local_users_password}
+      DB_SSL_MODE: ${DB_SSL_MODE:-DISABLED}
       SMTP_HOST: smtp.gmail.com
       SMTP_PORT: "587"
       SMTP_USERNAME: ${SMTP_USERNAME:-}
@@ -51,3 +75,4 @@ services:
 
 volumes:
   mysql-data:
+  postgres-data:
