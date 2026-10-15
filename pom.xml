@@ -22,6 +22,8 @@
     <lombok.version>1.18.38</lombok.version>
     <mysql.connector.version>9.3.0</mysql.connector.version>
     <postgresql.connector.version>42.7.4</postgresql.connector.version>
+    <!-- ByteBuddy moderno: necesario para que Mockito funcione en JDK 21+. Solo afecta a tests. -->
+    <byte-buddy.version>1.18.15</byte-buddy.version>
     <javamail.version>1.6.2</javamail.version>
     <bcrypt.version>0.10.2</bcrypt.version>
     <jjwt.version>0.13.0</jjwt.version>
@@ -155,6 +157,30 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <!--
+      ByteBuddy falla en JDK 25 con "Failed to resolve the class file version of the current
+      VM: Unknown Java version: 0", lo que tumba todos los tests que usan Mockito.
+
+      ByteBuddy lleva una tabla interna de versiones de Java. Spring Boot gestiona la 1.14.19
+      (finales de 2023), que no conoce Java 25. Se sube a la 1.18.15, que si lo reconoce.
+
+      Es un cambio SOLO de test: no toca el artefacto que se despliega ni el runtime de Render
+      (sigue siendo temurin-17 dentro del Docker). Solo permite ejecutar "mvn test" en maquinas
+      con JDK moderno, sin necesidad de instalar un JDK 17.
+    -->
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy</artifactId>
+      <version>${byte-buddy.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.bytebuddy</groupId>
+      <artifactId>byte-buddy-agent</artifactId>
+      <version>${byte-buddy.version}</version>
       <scope>test</scope>
     </dependency>
 
