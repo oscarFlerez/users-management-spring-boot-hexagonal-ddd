@@ -1,12 +1,55 @@
+# =============================================
+# Entorno local con dos motores, selecionado por perfil.
+#
+#   docker compose --profile mysql up        # MySQL    (default de la app: db.dialect=mysql)
+#   docker compose --profile postgres up     # PostgreSQL (mismo camino que Supabase en produccion)
+#
+# No existe un `docker compose up` a secas: los dos pares motor+api estan perfilados. Es
+# deliberado. Si `api` no tuviera perfil, `--profile postgres up` la levantaria ademas de
+# `api-postgres` y las dos pelearian por el puerto 8080.
+#
+# Hay DOS servicios de api (y no uno) por una limitacion de Compose: `depends_on` exige que
+# el servicio exista en el conjunto habilitado, y un servicio con perfil no habilitado no
+# existe ahi. Con un unico `api`(profile vacio) + `depends_on: mysql`, el archivo entero se
+# rechaza con "depends on undefined service". Ver README.
+# =============================================
+
+x-api-base: &api-base
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: users-management-api:local
+  ports:
+    - "8080:8080"
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+
+x-jwt: &jwt
+  JWT_SECRET: ${JWT_SECRET:-ZGV2ZWxvcG1lbnQtb25seS1qd3Qtc2VjcmV0LW11c3QtYmUtcmVwbGFjZWQ=}
+  JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-900}
+
+x-smtp: &smtp
+  SMTP_HOST: smtp.gmail.com
+  SMTP_PORT: "587"
+  SMTP_USERNAME: ${SMTP_USERNAME:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_FROM_ADDRESS: ${SMTP_FROM_ADDRESS:-}
+  SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Gestion de Usuarios}
+
 services:
+
+  # ---------------------------------------------------------------
+  # MySQL
+  # ---------------------------------------------------------------
   mysql:
     image: mysql:8.4
     profiles: ["mysql"]
     environment:
       MYSQL_DATABASE: crud_usuarios
       MYSQL_USER: users_app
-      MYSQL_PASSWORD: local_users_password
-      MYSQL_ROOT_PASSWORD: local_root_password
+      MYSQL_PASSWORD: ${DB_PASSWORD:-local_users_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-local_root_password}
     ports:
       - "3306:3306"
     volumes:
@@ -22,15 +65,34 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  api:
+    <<: *api-base
+    profiles: ["mysql"]
+    environment:
+      PORT: "8080"
+      DB_DIALECT: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: crud_usuarios
+      DB_USERNAME: users_app
+      DB_PASSWORD: ${DB_PASSWORD:-local_users_password}
+      DB_SSL_MODE: DISABLED
+      <<: [*smtp, *jwt]
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------
+  # PostgreSQL
+  # ---------------------------------------------------------------
   postgres:
     # PostgreSQL local, para probar el mismo camino que usa Supabase en produccion.
-    # docker compose --profile postgres up
     image: postgres:17-alpine
     profiles: ["postgres"]
     environment:
       POSTGRES_DB: crud_usuarios
       POSTGRES_USER: users_app
-      POSTGRES_PASSWORD: local_users_password
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-local_users_password}
     ports:
       - "5432:5432"
     volumes:
@@ -44,34 +106,22 @@ services:
       start_period: 10s
     restart: unless-stopped
 
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: users-management-api:local
+  api-postgres:
+    <<: *api-base
+    profiles: ["postgres"]
     environment:
       PORT: "8080"
-      DB_DIALECT: ${DB_DIALECT:-mysql}
-      DB_HOST: ${DB_HOST:-mysql}
-      DB_PORT: ${DB_PORT:-3306}
-      DB_NAME: ${DB_NAME:-crud_usuarios}
-      DB_USERNAME: ${DB_USERNAME:-users_app}
+      DB_DIALECT: postgresql
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: crud_usuarios
+      DB_USERNAME: users_app
       DB_PASSWORD: ${DB_PASSWORD:-local_users_password}
-      DB_SSL_MODE: ${DB_SSL_MODE:-DISABLED}
-      SMTP_HOST: smtp.gmail.com
-      SMTP_PORT: "587"
-      SMTP_USERNAME: ${SMTP_USERNAME:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      SMTP_FROM_ADDRESS: ${SMTP_FROM_ADDRESS:-}
-      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Gestion de Usuarios}
-      JWT_SECRET: ${JWT_SECRET:-ZGV2ZWxvcG1lbnQtb25seS1qd3Qtc2VjcmV0LW11c3QtYmUtcmVwbGFjZWQ=}
-      JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-900}
-    ports:
-      - "8080:8080"
+      DB_SSL_MODE: DISABLED
+      <<: [*smtp, *jwt]
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
-    restart: unless-stopped
 
 volumes:
   mysql-data:
