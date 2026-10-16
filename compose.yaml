@@ -1,17 +1,17 @@
 # =============================================
 # Entorno local con dos motores, selecionado por perfil.
 #
-#   docker compose --profile mysql up        # MySQL    (default de la app: db.dialect=mysql)
-#   docker compose --profile postgres up     # PostgreSQL (mismo camino que Supabase en produccion)
+#   docker compose --profile mysql up        # MySQL
+#   docker compose --profile postgres up     # PostgreSQL, el mismo dialeto que usa Supabase en produccion
 #
-# No existe un `docker compose up` a secas: los dos pares motor+api estan perfilados. Es
-# deliberado. Si `api` no tuviera perfil, `--profile postgres up` la levantaria ademas de
-# `api-postgres` y las dos pelearian por el puerto 8080.
+# No existe un `docker compose up` a secas: los dos pares motor+api estan perfilados.
+# Es deliberado. Con un unico `api` sin perfil, `depends_on: mysql` harian que el
+# archivo entero se rechazara con "depends on undefined service 'mysql'".
 #
-# Hay DOS servicios de api (y no uno) por una limitacion de Compose: `depends_on` exige que
-# el servicio exista en el conjunto habilitado, y un servicio con perfil no habilitado no
-# existe ahi. Con un unico `api`(profile vacio) + `depends_on: mysql`, el archivo entero se
-# rechaza con "depends on undefined service". Ver README.
+# Los secretos (DB_PASSWORD, JWT_SECRET, BREVO_API_KEY, BREVO_FROM_ADDRESS) se pasan
+# a traves de un archivo .env en la raiz. Copie compose.env.example como .env y
+# reemplace los valores. Compose fallara si falta algun secreto marcado con ':?'.
+# Los puertos de MySQL, PostgreSQL y la API se publican solo en 127.0.0.1.
 # =============================================
 
 x-api-base: &api-base
@@ -19,23 +19,18 @@ x-api-base: &api-base
     context: .
     dockerfile: Dockerfile
   image: users-management-api:local
-  ports:
-    - "8080:8080"
   restart: unless-stopped
   security_opt:
     - no-new-privileges:true
 
-x-jwt: &jwt
-  JWT_SECRET: ${JWT_SECRET:-ZGV2ZWxvcG1lbnQtb25seS1qd3Qtc2VjcmV0LW11c3QtYmUtcmVwbGFjZWQ=}
-  JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-900}
+x-brevo: &brevo
+  BREVO_API_KEY: ${BREVO_API_KEY:?Defina BREVO_API_KEY en el archivo .env local}
+  BREVO_FROM_ADDRESS: ${BREVO_FROM_ADDRESS:?Defina BREVO_FROM_ADDRESS en el archivo .env local}
+  BREVO_FROM_NAME: ${BREVO_FROM_NAME:-Gestion de Usuarios}
 
-x-smtp: &smtp
-  SMTP_HOST: smtp.gmail.com
-  SMTP_PORT: "587"
-  SMTP_USERNAME: ${SMTP_USERNAME:-}
-  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-  SMTP_FROM_ADDRESS: ${SMTP_FROM_ADDRESS:-}
-  SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Gestion de Usuarios}
+x-jwt: &jwt
+  JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET en el archivo .env local}
+  JWT_EXPIRATION_SECONDS: ${JWT_EXPIRATION_SECONDS:-900}
 
 services:
 
@@ -48,10 +43,10 @@ services:
     environment:
       MYSQL_DATABASE: crud_usuarios
       MYSQL_USER: users_app
-      MYSQL_PASSWORD: ${DB_PASSWORD:-local_users_password}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-local_root_password}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD en el archivo .env local}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Defina MYSQL_ROOT_PASSWORD en el archivo .env local}
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
@@ -75,26 +70,28 @@ services:
       DB_PORT: "3306"
       DB_NAME: crud_usuarios
       DB_USERNAME: users_app
-      DB_PASSWORD: ${DB_PASSWORD:-local_users_password}
+      DB_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD en el archivo .env local}
       DB_SSL_MODE: DISABLED
-      <<: [*smtp, *jwt]
+      <<: [*brevo, *jwt]
+    ports:
+      - "127.0.0.1:8080:8080"
     depends_on:
       mysql:
         condition: service_healthy
 
   # ---------------------------------------------------------------
   # PostgreSQL
+  # PostgreSQL local, para probar el mismo dialeto que usa Supabase en produccion.
   # ---------------------------------------------------------------
   postgres:
-    # PostgreSQL local, para probar el mismo camino que usa Supabase en produccion.
     image: postgres:17-alpine
     profiles: ["postgres"]
     environment:
       POSTGRES_DB: crud_usuarios
       POSTGRES_USER: users_app
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-local_users_password}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD en el archivo .env local}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./src/main/resources/schema-postgres.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
@@ -105,6 +102,8 @@ services:
       retries: 20
       start_period: 10s
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
 
   api-postgres:
     <<: *api-base
@@ -116,9 +115,11 @@ services:
       DB_PORT: "5432"
       DB_NAME: crud_usuarios
       DB_USERNAME: users_app
-      DB_PASSWORD: ${DB_PASSWORD:-local_users_password}
+      DB_PASSWORD: ${DB_PASSWORD:?Defina DB_PASSWORD en el archivo .env local}
       DB_SSL_MODE: DISABLED
-      <<: [*smtp, *jwt]
+      <<: [*brevo, *jwt]
+    ports:
+      - "127.0.0.1:8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
