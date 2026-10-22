@@ -5,13 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests para EmailDestinationModel.
- *
- * <p>Verifica el camino feliz (todos los getters) y los cuatro puntos de validación del
- * constructor: cada campo tiene su propia llamada a {@code validateNotBlank}, por lo que se
- * necesita un test por campo para alcanzar esa instrucción y ejercer las dos ramas (null y blank).
- */
+/** Tests para EmailDestinationModel. */
 @DisplayName("EmailDestinationModel")
 class EmailDestinationModelTest {
 

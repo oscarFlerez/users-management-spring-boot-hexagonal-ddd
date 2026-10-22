@@ -8,13 +8,7 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests para UserDeletedDomainEvent.
- *
- * <p>Este evento es el más simple: recibe un UserId y genera un payload con una sola entrada. Se
- * verifica que el nombre del evento sea correcto, que occurredOn quede registrado, que el accessor
- * userId() devuelva la misma referencia y que el payload contenga exactamente un campo.
- */
+/** Tests para UserDeletedDomainEvent. */
 @DisplayName("UserDeletedDomainEvent")
 class UserDeletedDomainEventTest {
 

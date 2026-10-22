@@ -26,11 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Tests para DeleteUserService.
- *
- * <p>Cubre: flujo feliz (delete invocado), usuario no encontrado y validación del command.
- */
+/** Tests para DeleteUserService. */
 @DisplayName("DeleteUserService")
 @ExtendWith(MockitoExtension.class)
 class DeleteUserServiceTest {

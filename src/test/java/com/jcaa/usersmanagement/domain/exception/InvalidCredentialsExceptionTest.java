@@ -5,13 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests para InvalidCredentialsException.
- *
- * <p>Un solo test ejerce AMBAS factories y verifica la regla de negocio real: cada escenario de
- * autenticación fallida debe comunicar una razón distinta. No se necesitan dos tests separados
- * porque la lógica valiosa es la diferencia entre mensajes.
- */
+/** Tests para InvalidCredentialsException. */
 @DisplayName("InvalidCredentialsException")
 class InvalidCredentialsExceptionTest {
 

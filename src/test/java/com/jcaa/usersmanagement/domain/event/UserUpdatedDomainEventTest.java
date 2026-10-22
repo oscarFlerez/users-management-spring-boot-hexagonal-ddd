@@ -15,13 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests para UserUpdatedDomainEvent.
- *
- * <p>Misma estructura que UserCreatedDomainEvent pero con el nombre de evento "user.updated". Se
- * usan datos de fixture distintos (ADMIN / INACTIVE) para garantizar que el payload refleja
- * correctamente los datos del usuario actualizado y no confundirlo con los tests de creación.
- */
+/** Tests para UserUpdatedDomainEvent. */
 @DisplayName("UserUpdatedDomainEvent")
 class UserUpdatedDomainEventTest {
 

@@ -23,13 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Tests for UserPersistenceMapper.
- *
- * <p>Covers: fromModelToDto(), fromEntityToModel(), fromResultSetToEntity() (happy path and
- * SQLException propagation), and fromResultSetToModelList() — empty list, multiple rows, and
- * SQLException propagation during iteration.
- */
+/** Tests for UserPersistenceMapper. */
 @DisplayName("UserPersistenceMapper")
 @ExtendWith(MockitoExtension.class)
 class UserPersistenceMapperTest {

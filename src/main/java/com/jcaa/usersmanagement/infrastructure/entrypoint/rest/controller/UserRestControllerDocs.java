@@ -17,25 +17,22 @@ import java.util.List;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-/**
- * Contrato OpenAPI / Swagger para {@link UserRestController}.
- *
- * <p>Toda la documentación de la API (anotaciones {@code @Operation}, {@code @ApiResponses}, etc.)
- * vive aquí para mantener el controlador limpio y enfocado únicamente en la lógica de despacho.
- */
+/** Contrato OpenAPI / Swagger de los endpoints de usuarios. */
 @Tag(name = "Users", description = "Gestión de usuarios: crear, consultar, actualizar y eliminar.")
 public interface UserRestControllerDocs {
 
-  // ─────────────────────────────────────────────────────────────────────────────
   // POST /api/users
-  // ─────────────────────────────────────────────────────────────────────────────
 
   @Operation(
       summary = "Crear usuario",
       description =
           "Registra un nuevo usuario en el sistema. "
               + "El ID debe ser único y el correo no puede estar en uso. "
-              + "Se enviará un correo de bienvenida con las credenciales al registrarlo.")
+              + "Se enviará un correo de bienvenida con las credenciales al registrarlo. "
+              + "El estado inicial es PENDING y un administrador debe activarlo con PUT. "
+              + "Abierto solo mientras la tabla de usuarios esté vacía, que es como se crea "
+              + "el primer administrador; a partir de ahí exige un JWT con rol ADMIN. "
+              + "Esto evita que cualquiera pueda crear filas o disparar envíos de correo.")
   @ApiResponses({
     @ApiResponse(
         responseCode = "201",
@@ -59,6 +56,20 @@ public interface UserRestControllerDocs {
                 mediaType = "application/json",
                 schema = @Schema(implementation = ApiErrorResponse.class))),
     @ApiResponse(
+        responseCode = "401",
+        description = "Sesión requerida: la tabla de usuarios ya no está vacía.",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiErrorResponse.class))),
+    @ApiResponse(
+        responseCode = "403",
+        description = "Rol insuficiente: solo un ADMIN puede crear usuarios.",
+        content =
+            @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ApiErrorResponse.class))),
+    @ApiResponse(
         responseCode = "500",
         description = "Error interno del servidor.",
         content =
@@ -68,9 +79,7 @@ public interface UserRestControllerDocs {
   })
   UserRestResponse create(@Valid @RequestBody CreateUserRestRequest request);
 
-  // ─────────────────────────────────────────────────────────────────────────────
   // GET /api/users
-  // ─────────────────────────────────────────────────────────────────────────────
 
   @Operation(
       summary = "Listar todos los usuarios",
@@ -93,9 +102,7 @@ public interface UserRestControllerDocs {
   })
   List<UserRestResponse> getAll();
 
-  // ─────────────────────────────────────────────────────────────────────────────
   // GET /api/users/{id}
-  // ─────────────────────────────────────────────────────────────────────────────
 
   @Operation(
       summary = "Obtener usuario por ID",
@@ -128,9 +135,7 @@ public interface UserRestControllerDocs {
           @PathVariable
           String id);
 
-  // ─────────────────────────────────────────────────────────────────────────────
   // PUT /api/users/{id}
-  // ─────────────────────────────────────────────────────────────────────────────
 
   @Operation(
       summary = "Actualizar usuario",
@@ -181,9 +186,7 @@ public interface UserRestControllerDocs {
           String id,
       @Valid @RequestBody UpdateUserRestRequest request);
 
-  // ─────────────────────────────────────────────────────────────────────────────
   // DELETE /api/users/{id}
-  // ─────────────────────────────────────────────────────────────────────────────
 
   @Operation(
       summary = "Eliminar usuario",

@@ -25,12 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Tests para LoginService.
- *
- * <p>Cubre: login exitoso, email no encontrado, contraseña incorrecta, usuario inactivo/bloqueado y
- * validación del command.
- */
+/** Tests para LoginService. */
 @DisplayName("LoginService")
 @ExtendWith(MockitoExtension.class)
 class LoginServiceTest {

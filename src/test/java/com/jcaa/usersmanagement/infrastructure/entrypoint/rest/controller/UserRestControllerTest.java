@@ -1,5 +1,6 @@
 package com.jcaa.usersmanagement.infrastructure.entrypoint.rest.controller;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -11,6 +12,7 @@ import com.jcaa.usersmanagement.application.port.in.DeleteUserUseCase;
 import com.jcaa.usersmanagement.application.port.in.GetAllUsersUseCase;
 import com.jcaa.usersmanagement.application.port.in.GetUserByIdUseCase;
 import com.jcaa.usersmanagement.application.port.in.UpdateUserUseCase;
+import com.jcaa.usersmanagement.application.port.out.GetAllUsersPort;
 import com.jcaa.usersmanagement.application.service.dto.query.GetUserByIdQuery;
 import com.jcaa.usersmanagement.domain.enums.UserRole;
 import com.jcaa.usersmanagement.domain.enums.UserStatus;
@@ -19,6 +21,7 @@ import com.jcaa.usersmanagement.domain.valueobject.UserEmail;
 import com.jcaa.usersmanagement.domain.valueobject.UserId;
 import com.jcaa.usersmanagement.domain.valueobject.UserName;
 import com.jcaa.usersmanagement.domain.valueobject.UserPassword;
+import com.jcaa.usersmanagement.infrastructure.security.BootstrapCreateUserAuthorization;
 import com.jcaa.usersmanagement.infrastructure.security.JwtAuthenticationFilter;
 import com.jcaa.usersmanagement.infrastructure.security.JwtTokenService;
 import com.jcaa.usersmanagement.infrastructure.security.RestAccessDeniedHandler;
@@ -34,6 +37,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 @WebMvcTest(
     controllers = UserRestController.class,
     properties = "spring.main.web-application-type=servlet")
@@ -41,7 +46,8 @@ import org.springframework.test.web.servlet.MockMvc;
   SecurityConfig.class,
   JwtAuthenticationFilter.class,
   RestAuthenticationEntryPoint.class,
-  RestAccessDeniedHandler.class
+  RestAccessDeniedHandler.class,
+  BootstrapCreateUserAuthorization.class
 })
 @DisplayName("UserRestController")
 class UserRestControllerTest {
@@ -55,6 +61,7 @@ class UserRestControllerTest {
   @MockBean private DeleteUserUseCase deleteUserUseCase;
   @MockBean private GetUserByIdUseCase getUserByIdUseCase;
   @MockBean private GetAllUsersUseCase getAllUsersUseCase;
+  @MockBean private GetAllUsersPort getAllUsersPort;
   @MockBean private JwtTokenService jwtTokenService;
 
   @Test
@@ -128,5 +135,65 @@ class UserRestControllerTest {
         .perform(get("/api/users/{id}", ID))
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.status").value(403));
+  }
+
+  @Test
+  @DisplayName("POST /api/users debe exigir sesion cuando la tabla ya tiene usuarios")
+  void shouldRejectAnonymousCreateWhenUsersExist() throws Exception {
+    when(getAllUsersPort.getAll()).thenReturn(List.of(anyUser()));
+
+    mockMvc
+        .perform(
+            post("/api/users").contentType(MediaType.APPLICATION_JSON).content(validCreateBody()))
+        .andExpect(status().isUnauthorized())
+        .andExpect(jsonPath("$.status").value(401));
+  }
+
+  @Test
+  @WithMockUser(roles = "REVIEWER")
+  @DisplayName("POST /api/users debe exigir rol ADMIN cuando la tabla ya tiene usuarios")
+  void shouldRejectNonAdminCreateWhenUsersExist() throws Exception {
+    when(getAllUsersPort.getAll()).thenReturn(List.of(anyUser()));
+
+    mockMvc
+        .perform(
+            post("/api/users").contentType(MediaType.APPLICATION_JSON).content(validCreateBody()))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.status").value(403));
+  }
+
+  @Test
+  @WithMockUser(roles = "ADMIN")
+  @DisplayName("POST /api/users debe permitir a un ADMIN crear con la tabla poblada")
+  void shouldAllowAdminCreateWhenUsersExist() throws Exception {
+    when(getAllUsersPort.getAll()).thenReturn(List.of(anyUser()));
+    when(createUserUseCase.execute(any())).thenReturn(anyUser());
+
+    mockMvc
+        .perform(
+            post("/api/users").contentType(MediaType.APPLICATION_JSON).content(validCreateBody()))
+        .andExpect(status().isCreated());
+  }
+
+  private static UserModel anyUser() {
+    return new UserModel(
+        new UserId(ID),
+        new UserName("Ada Lovelace"),
+        new UserEmail("ada@example.com"),
+        UserPassword.fromHash("$2a$12$abcdefghijklmnopqrstuuuuuuuuuuuuuuuuuuuuuuuuuuuuu"),
+        UserRole.ADMIN,
+        UserStatus.ACTIVE);
+  }
+
+  private static String validCreateBody() {
+    return """
+        {
+          "id": "%s",
+          "name": "Ada Lovelace",
+          "email": "ada@example.com",
+          "password": "clave larga 123",
+          "role": "REVIEWER"
+        }
+        """.formatted(ID);
   }
 }

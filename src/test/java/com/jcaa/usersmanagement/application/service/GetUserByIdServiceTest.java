@@ -25,11 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Tests para GetUserByIdService.
- *
- * <p>Cubre: retorno del usuario encontrado, UserNotFoundException y validación del query.
- */
+/** Tests para GetUserByIdService. */
 @DisplayName("GetUserByIdService")
 @ExtendWith(MockitoExtension.class)
 class GetUserByIdServiceTest {

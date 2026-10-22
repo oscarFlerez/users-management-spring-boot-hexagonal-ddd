@@ -14,12 +14,7 @@ import com.jcaa.usersmanagement.domain.valueobject.UserPassword;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests para UserApplicationMapper.
- *
- * <p>Cubre cada método público de conversión y las dos ramas del helper privado
- * {@code resolvePassword}: contraseña nueva presente y contraseña ausente (null / blank).
- */
+/** Tests para UserApplicationMapper. */
 @DisplayName("UserApplicationMapper")
 class UserApplicationMapperTest {
 

@@ -8,7 +8,6 @@ public record UserId(String value) {
   public UserId {
     final String normalizedValue = Objects.requireNonNull(value, "UserId cannot be null").trim();
     validateNotEmpty(normalizedValue);
-    // asigna el valor normalizado al componente
     value = normalizedValue;
   }
 

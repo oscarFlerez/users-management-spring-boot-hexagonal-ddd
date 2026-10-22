@@ -44,13 +44,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Tests for UserController.
- *
- * <p>Covers: correct delegation to every use-case port, accurate DTO→command/query mapping,
- * accurate domain-model→response mapping, and transparent exception propagation. All ports are
- * mocked; no infrastructure is exercised.
- */
+/** Tests for UserController. */
 @DisplayName("UserController")
 @ExtendWith(MockitoExtension.class)
 class UserControllerTest {

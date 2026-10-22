@@ -15,13 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests para UserCreatedDomainEvent.
- *
- * <p>Estrategia: un @Test por cada comportamiento observable del evento (eventName, occurredOn,
- * user, payload). De paso, cada test ejecuta el constructor heredado de DomainEvent, cubriendo la
- * clase abstracta sin necesidad de una clase separada.
- */
+/** Tests para UserCreatedDomainEvent. */
 @DisplayName("Test de UserCreatedDomainEvent")
 class UserCreatedDomainEventTest {
 

@@ -5,12 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests para EmailSenderException.
- *
- * <p>De paso cubre el constructor de dos argumentos de {@code DomainException} (abstracta),
- * alcanzable sólo a través de {@code becauseSendFailed(cause)}.
- */
+/** Tests para EmailSenderException. */
 @DisplayName("EmailSenderException")
 class EmailSenderExceptionTest {
 

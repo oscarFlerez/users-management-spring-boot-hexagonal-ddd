@@ -36,5 +36,13 @@ CREATE TABLE IF NOT EXISTS users (
 --   { "name": "Administrador", "email": "tu@correo.com",
 --     "password": "una contrasena larga y unica", "role": "ADMIN" }
 --
+-- Ese registro es publico SOLO mientras la tabla este vacia. En cuanto existe un usuario,
+-- POST /api/users exige un JWT con rol ADMIN (BootstrapCreateUserAuthorization). Asi el
+-- arranque sigue funcionando pero nadie puede meter filas ni disparar correos de bienvenida
+-- a direcciones arbitrarias, que agotarian la cuota de Brevo.
+--
+-- Los roles no se cambian desde fuera: PUT /api/users/{id} exige ADMIN, asi que un
+-- REVIEWER solo puede listar y consultar.
+--
 -- La API hashea la contrasena con BCrypt (coste 12); nunca escribas el hash a mano aqui.
 

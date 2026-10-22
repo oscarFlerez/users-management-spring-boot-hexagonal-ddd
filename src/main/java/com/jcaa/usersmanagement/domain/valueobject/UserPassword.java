@@ -15,10 +15,7 @@ public final class UserPassword {
     this.value = value;
   }
 
-  /**
-   * Crea un UserPassword desde texto plano: valida y aplica hash BCrypt. Usar cuando el usuario
-   * crea o cambia su contraseña.
-   */
+  /** Texto plano: valida y aplica hash BCrypt. */
   public static UserPassword fromPlainText(final String plainText) {
     final String normalizedValue =
         Objects.requireNonNull(plainText, "Password cannot be null").trim();
@@ -29,9 +26,7 @@ public final class UserPassword {
     return new UserPassword(hash);
   }
 
-  /**
-   * Crea un UserPassword desde un hash ya almacenado en base de datos. No re-valida ni re-hashea.
-   */
+  /** Hash ya almacenado: no re-valida. */
   public static UserPassword fromHash(final String hash) {
     Objects.requireNonNull(hash, "Password hash cannot be null");
     return new UserPassword(hash);

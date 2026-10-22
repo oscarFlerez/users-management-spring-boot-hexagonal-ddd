@@ -1,15 +1,6 @@
 package com.jcaa.usersmanagement.infrastructure.adapter.persistence.config;
 
-/**
- * Construye la URL JDBC segun el motor de base de datos configurado.
- *
- * <p>El proyecto usa JDBC a pelo, sin JPA, asi que la URL es lo unico que decide que driver se
- * carga. Se soportan dos motores porque conviven dos entornos: MySQL en local (compose.yaml) y
- * PostgreSQL en produccion (Supabase, que es PostgreSQL y no MySQL).
- *
- * <p>Los parametros de SSL no coinciden entre motores: MySQL usa {@code sslMode} y PostgreSQL
- * {@code sslmode}. El valor se pasa tal cual lo declara cada driver.
- */
+/** Construye la URL JDBC segun el motor configurado. */
 public record DatabaseConfig(
     String host,
     int port,

@@ -12,13 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests para UserModel.
- *
- * <p>Sólo se testean los tres métodos con lógica real: {@code create()} que fija el estado inicial
- * PENDING, {@code activate()} y {@code deactivate()} que producen transiciones de estado. El
- * constructor trivial y los getters quedan cubiertos como efecto secundario de estos tests.
- */
+/** Tests para UserModel. */
 @DisplayName("UserModel")
 class UserModelTest {
 

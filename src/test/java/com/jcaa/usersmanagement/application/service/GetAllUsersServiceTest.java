@@ -19,11 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Tests para GetAllUsersService.
- *
- * <p>Cubre: lista con usuarios y lista vacía.
- */
+/** Tests para GetAllUsersService. */
 @DisplayName("GetAllUsersService")
 @ExtendWith(MockitoExtension.class)
 class GetAllUsersServiceTest {

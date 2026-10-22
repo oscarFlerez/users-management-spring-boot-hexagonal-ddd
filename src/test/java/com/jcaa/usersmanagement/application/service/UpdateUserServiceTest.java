@@ -28,12 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Tests para UpdateUserService.
- *
- * <p>Cubre: flujo feliz, usuario no encontrado, email tomado por otro usuario, email del mismo
- * usuario (no debe fallar) y validación del command.
- */
+/** Tests para UpdateUserService. */
 @DisplayName("UpdateUserService")
 @ExtendWith(MockitoExtension.class)
 class UpdateUserServiceTest {

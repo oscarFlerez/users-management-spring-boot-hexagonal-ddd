@@ -27,14 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Tests for UserRepositoryMySQL.
- *
- * <p>Covers all public methods with their branches: save() — happy path, INSERT failure, user not
- * found after insert (orElseThrow); update() — happy path, UPDATE failure; getById() — found, not
- * found, SQLException; getByEmail() — found, not found, SQLException; getAll() — happy path,
- * SQLException; delete() — happy path, SQLException.
- */
+/** Tests for UserRepositoryMySQL. */
 @DisplayName("UserRepositoryMySQL")
 @ExtendWith(MockitoExtension.class)
 class UserRepositoryMySQLTest {

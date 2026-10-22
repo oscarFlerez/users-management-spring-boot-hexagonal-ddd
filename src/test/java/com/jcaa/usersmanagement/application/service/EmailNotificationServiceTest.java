@@ -25,12 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-/**
- * Tests para EmailNotificationService.
- *
- * <p>Cubre: flujos felices de notificación, re-lanzamiento de EmailSenderException, template no
- * encontrado (is == null) e IOException al leer el template.
- */
+/** Tests para EmailNotificationService. */
 @DisplayName("EmailNotificationService")
 @ExtendWith(MockitoExtension.class)
 class EmailNotificationServiceTest {

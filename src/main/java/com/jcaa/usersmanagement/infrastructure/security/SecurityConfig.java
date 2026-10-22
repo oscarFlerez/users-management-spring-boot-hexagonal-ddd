@@ -25,7 +25,8 @@ public class SecurityConfig {
       final HttpSecurity http,
       final JwtAuthenticationFilter jwtAuthenticationFilter,
       final RestAuthenticationEntryPoint authenticationEntryPoint,
-      final RestAccessDeniedHandler accessDeniedHandler)
+      final RestAccessDeniedHandler accessDeniedHandler,
+      final BootstrapCreateUserAuthorization bootstrapCreateUserAuthorization)
       throws Exception {
     http.csrf(csrf -> csrf.disable())
         .httpBasic(httpBasic -> httpBasic.disable())
@@ -45,7 +46,7 @@ public class SecurityConfig {
                     .requestMatchers(OPEN_API_PATHS)
                     .permitAll()
                     .requestMatchers(HttpMethod.POST, USERS_PATH)
-                    .permitAll()
+                    .access(bootstrapCreateUserAuthorization)
                     .requestMatchers(HttpMethod.GET, USERS_PATH, USERS_DETAIL_PATH)
                     .hasAnyRole("ADMIN", "REVIEWER")
                     .requestMatchers(HttpMethod.PUT, USERS_DETAIL_PATH)

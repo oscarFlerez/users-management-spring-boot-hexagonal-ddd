@@ -5,14 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-/**
- * Tests para UserNotFoundException.
- *
- * <p>La excepción no tiene lógica de dominio propia; su valor está en el mensaje que produce: el id
- * del usuario no encontrado debe aparecer explícitamente para que la capa superior pueda construir
- * una respuesta de error útil. Estos tests existirán hasta que la capa de aplicación sea
- * desarrollada y la ejerza como efecto secundario de sus propios tests.
- */
+/** Tests para UserNotFoundException. */
 @DisplayName("UserNotFoundException")
 class UserNotFoundExceptionTest {
 
