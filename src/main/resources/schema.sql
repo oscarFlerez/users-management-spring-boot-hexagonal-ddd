@@ -20,29 +20,14 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- No se siembra ningun usuario por defecto, y por que.
---
--- Antes este script insertaba un admin@example.com con la contrasena "Admin1234!", pero el hash
--- era un placeholder ($2a$12$placeholder...): BCrypt exige exactamente 60 caracteres y este tenia
--- 47, asi que verify() devolvia false siempre y la cuenta no podia iniciar sesion. No era un
--- fallo de seguridad (fallaba cerrado), sino una cuenta muerta y un comentario engañoso.
---
--- Sembrar un admin con contrasena conocida si es un riesgo: en un despliegue nuevo ese par
--- usuario/contrasena existe en produccion y es publico, porque esta en el repositorio.
---
--- Para crear el primer administrador, registra un usuario por la API con role=ADMIN:
---
---   POST /api/users
---   { "name": "Administrador", "email": "tu@correo.com",
---     "password": "una contrasena larga y unica", "role": "ADMIN" }
---
--- Ese registro es publico SOLO mientras la tabla este vacia. En cuanto existe un usuario,
--- POST /api/users exige un JWT con rol ADMIN (BootstrapCreateUserAuthorization). Asi el
--- arranque sigue funcionando pero nadie puede meter filas ni disparar correos de bienvenida
--- a direcciones arbitrarias, que agotarian la cuota de Brevo.
---
--- Los roles no se cambian desde fuera: PUT /api/users/{id} exige ADMIN, asi que un
--- REVIEWER solo puede listar y consultar.
---
--- La API hashea la contrasena con BCrypt (coste 12); nunca escribas el hash a mano aqui.
+-- Administrador inicial documentado en la guia (contrasena: Admin1234!)
+INSERT INTO users (id, name, email, password, role, status)
+VALUES (
+    '00000000-0000-0000-0000-000000000001',
+    'Administrador',
+    'admin@example.com',
+    '$2a$12$sfwkajsls.fktQb0Ngw5cOiSiV3z4LIwbucSAy4sw2wyNlxbUBt4q',
+    'ADMIN',
+    'ACTIVE'
+);
 
